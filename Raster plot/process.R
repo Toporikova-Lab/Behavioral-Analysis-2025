@@ -39,11 +39,19 @@ rasterplot <- function(data, spiderid, start_dt = NULL) {
   for (dt in dts) {
     data_day <- data[dt < data$datetime & data$datetime < dt + 24*60*60,]
     
+    plot <- lineplot(data_day, spiderid)
+    
     if (dt == tail(dts, 1)) {
-      plot <- lineplot(data_day, spiderid) + xlim(dt, dt + 24*60*60)
+      plot <- plot + 
+        xlim(dt, dt + 24*60*60) +
+        ylab('') +
+        theme(axis.text.x=element_blank(),
+              axis.ticks.x=element_blank(),
+              axis.text.y=element_blank(),
+              axis.ticks.y=element_blank())
     }
     else {
-      plot <- lineplot(data_day, spiderid) +
+      plot <- plot +
         xlab('') +
         ylab('') +
         theme(axis.text.x=element_blank(),
@@ -55,6 +63,6 @@ rasterplot <- function(data, spiderid, start_dt = NULL) {
     plots <- append(plots, list(plot))
   }
   
-  plot_grid(plotlist=plots, nrow=length(plots), ncol=1)
+  plot_grid(plotlist=plots, nrow=length(plots), ncol=1, labels=1:length(plots), label_y = .5, label_x=.04)
 }
 
