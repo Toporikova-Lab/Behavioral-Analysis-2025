@@ -4,6 +4,8 @@ library(cowplot)
 process <- function(filename, header=FALSE, sep='\t') {
   df <- read.csv(filename, header, sep)
   
+  df <- na.omit(df)
+  
   spider_ids <- paste0("s", 1:32)
   
   datetime_format <- "%d %b %y %H:%M:%S"
@@ -32,10 +34,11 @@ rasterplot <- function(data, spiderid, zt_0 = NULL, start_dt = NULL, end_dt = NU
   if (is.null(end_dt)) {
     end_dt <- tail(datetime, 1)
   }
+  
   if (is.null(zt_0)) {
     zt_0 <- start_dt
   }
-  if (!is.POSIXct(zt_0)) {
+  else {
     zt_0 <- as.POSIXct(zt_0, format='%H:%M')
   }
   
@@ -45,11 +48,13 @@ rasterplot <- function(data, spiderid, zt_0 = NULL, start_dt = NULL, end_dt = NU
   
   data$zt_time <- (as.numeric(diff) %% 1) * 24
   
-  y_breaks = unique(data$zt_day)
+  y_breaks <- unique(data$zt_day)
+  x_breaks <- seq(0, 24, 3)
   
   ggplot(data, aes(x = zt_time, y = zt_day)) +
     geom_tile(aes(fill=light), width=1/60, height=.8) +
     scale_y_reverse(breaks=y_breaks) +
+    scale_x_continuous(breaks=x_breaks) +
     scale_fill_gradientn(colours=c("#ffffff00", "#ffff66")) +
     annotate(geom="tile",
              x=data$zt_time,
