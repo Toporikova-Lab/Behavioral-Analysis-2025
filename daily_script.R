@@ -1,7 +1,7 @@
 source('Raster plot/process.R')
 source('Raster plot/death_detection.R')
 
-filename <- "Raw Monitor Data/test-data/Monitor2.txt"
+filename <- "--FILENAME HERE--"
 lights_on_time <- "00:00"
 
 data <- process(filename)

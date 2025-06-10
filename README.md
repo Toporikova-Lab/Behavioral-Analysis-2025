@@ -13,10 +13,30 @@ This project depends on the following R packages:
 -   ggplot2 (part of tidyverse)
 -   cowplot
 
-These can be installed by running these commands in the R console:
+## Instructions for Using the Daily Script
+
+*NOTE: these instructions are written with Windows in mind*
+
+Start by cloning the github repository to your computer. If you do not have git installed, it can be downloaded from <https://git-scm.com/downloads>. In the directory where you want your repository, open a terminal and run this command:
 
 ```         
-install.packages('ggplot2')
-install.packages('cowplot')
+git clone https://github.com/Toporikova-Lab/Behavioral-Analysis-2025
 ```
-## The usage of the code 
+
+After the repository has been cloned to your computer, open the **Behavioral-Analysis-2025.Rproj** file in RStudio.
+
+To install the required R packages, run this command in the interactive console:
+
+```         
+install.packages(c('ggplot2', 'cowplot))
+```
+
+Open the **daily_script.R** file in the editor.
+
+Locate the monitor data file that you want to use, and copy its file path.
+
+Paste this path in place of the "--FILENAME HERE--" at the top of the **daily_script.R** file. Make sure to use forward slashes instead of backslashes in the path.
+
+To run the script, use `Ctrl` + `Shift` + `Enter` while in the editor.
+
+The script will generate text in your R console, as well as raster plots in a folder named **generated_plots/**.
