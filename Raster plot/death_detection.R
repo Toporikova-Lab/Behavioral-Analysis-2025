@@ -7,7 +7,7 @@ check_activity <- function(data, spiderid, end_dt=NULL, cutoff_hrs=24) {
   
   last_dt <- tail(data_active$datetime, 1)
   
-  (end_dt - last_dt) < hours(24)
+  (end_dt - last_dt) < as.difftime('24:00:00')
 }
 
 check_activity_all <- function(data, end_dt=NULL, cutoff_hrs=24) {

@@ -23,46 +23,43 @@ lineplot <- function(data, spiderid) {
     geom_ribbon(aes(ymin=0, ymax=(get(spiderid)>0)*1), stat="identity", fill="#101010")
 }
 
-rasterplot <- function(data, spiderid, start_dt = NULL) {
+rasterplot <- function(data, spiderid, zt_0 = NULL, start_dt = NULL, end_dt = NULL) {
+  datetime <- data$datetime
+  
   if (is.null(start_dt)) {
-    start_dt <- data$datetime[1]
+    start_dt <- datetime[1]
+  }
+  if (is.null(end_dt)) {
+    end_dt <- tail(datetime, 1)
+  }
+  if (is.null(zt_0)) {
+    zt_0 <- start_dt
+  }
+  if (!is.POSIXct(zt_0)) {
+    zt_0 <- as.POSIXct(zt_0, format='%H:%M')
   }
   
-  end_dt <- tail(data$datetime, 1)
+  diff <- difftime(datetime, zt_0, units='days')
   
-  dts <- seq(start_dt, end_dt, by="day")
+  data$zt_day <- floor(diff) - floor(diff[1]) + 1
   
-  print(dts)
+  data$zt_time <- (as.numeric(diff) %% 1) * 24
   
-  plots <- list()
+  y_breaks = unique(data$zt_day)
   
-  for (dt in dts) {
-    data_day <- data[dt < data$datetime & data$datetime < dt + 24*60*60,]
-    
-    plot <- lineplot(data_day, spiderid)
-    
-    if (dt == tail(dts, 1)) {
-      plot <- plot + 
-        xlim(dt, dt + 24*60*60) +
-        ylab('') +
-        theme(axis.text.x=element_blank(),
-              axis.ticks.x=element_blank(),
-              axis.text.y=element_blank(),
-              axis.ticks.y=element_blank())
-    }
-    else {
-      plot <- plot +
-        xlab('') +
-        ylab('') +
-        theme(axis.text.x=element_blank(),
-              axis.ticks.x=element_blank(),
-              axis.text.y=element_blank(),
-              axis.ticks.y=element_blank())
-    }
-    
-    plots <- append(plots, list(plot))
-  }
-  
-  plot_grid(plotlist=plots, nrow=length(plots), ncol=1, labels=1:length(plots), label_y = .5, label_x=.04)
+  ggplot(data, aes(x = zt_time, y = zt_day)) +
+    geom_tile(aes(fill=light), width=1/60, height=.8) +
+    scale_y_reverse(breaks=y_breaks) +
+    scale_fill_gradientn(colours=c("#ffffff00", "#ffff66")) +
+    annotate(geom="tile",
+             x=data$zt_time,
+             y=data$zt_day,
+             width=1/60,
+             height=.8,
+             fill=scales::colour_ramp(c("#ffffff00", "#000000"))(data[,spiderid] > 0)
+    ) +
+    theme(legend.position = "none") +
+    ggtitle(paste('Activity for ', spiderid)) +
+    xlab('ZT (hrs)') +
+    ylab('Day')
 }
-
