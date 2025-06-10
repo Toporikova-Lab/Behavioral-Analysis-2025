@@ -19,4 +19,4 @@ These can be installed by running these commands in the R console:
 install.packages('ggplot2')
 install.packages('cowplot')
 ```
-## The 
+## The usage of the code 
