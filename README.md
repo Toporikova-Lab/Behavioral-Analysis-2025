@@ -4,7 +4,7 @@ This repository contains code for collection and analysis of spider locomotor ac
 
 ## Experiment Description
 
-Using the DAMSystem3 data collection software, we are monitoring the locomotor activity of spiders in relation to light exposure. An automated timer controls the light cycle, turning the light on from 8:00 AM to 8:00 PM and off from 8:00 PM to 8:00 AM. During these periods, the spiders’ activity is being recorded by a monitoring system that tracks the number of times each spider crosses a hole in its vial.
+Using the DAMSystem3 data collection software, we are monitoring the locomotor activity of spiders in relation to light exposure. An automated timer controls the light cycle, turning the light on from 12:00 AM to 12:00 PM and off from 12:00 PM to 12:00 AM. During these periods, the spiders’ activity is being recorded by a monitoring system that tracks the number of times each spider crosses a hole in its vial.
 
 ## Required R Libraries
 
@@ -19,3 +19,4 @@ These can be installed by running these commands in the R console:
 install.packages('ggplot2')
 install.packages('cowplot')
 ```
+## The 
