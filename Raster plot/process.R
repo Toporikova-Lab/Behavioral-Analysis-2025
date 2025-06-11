@@ -1,5 +1,4 @@
 library(ggplot2)
-library(cowplot)
 
 process <- function(filename, header=FALSE, sep='\t') {
   df <- read.csv(filename, header, sep)
@@ -36,7 +35,7 @@ rasterplot <- function(data, spiderid, zt_0 = NULL, start_dt = NULL, end_dt = NU
   }
   
   if (is.null(zt_0)) {
-    zt_0 <- start_dt
+    zt_0 <- data$datetime[diff(data$light, 1) == 1][1] # first time light turns on
   }
   else {
     zt_0 <- as.POSIXct(zt_0, format='%H:%M')

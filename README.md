@@ -85,4 +85,3 @@ Example output:
 One of the generated raster plots might look something like this:
 
 ![Raster plot with ZT (hours) on the x-axis and Day on the y-axis showing seven days of constant darkness followed by 9 days of light-dark cycle](https://github.com/user-attachments/assets/a8b6644a-8f87-4faa-8cb4-4f84c4ad8837)
-
