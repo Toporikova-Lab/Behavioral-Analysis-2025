@@ -23,12 +23,12 @@ Start by cloning the github repository to your computer. If you do not have git 
 git clone https://github.com/Toporikova-Lab/Behavioral-Analysis-2025
 ```
 
-After the repository has been cloned to your computer, open the **Behavioral-Analysis-2025.Rproj** file in RStudio.
+After the repository has been cloned to your computer, navigate to the directory it was cloned into. This should be called **Behavioral-Analysis-2025/**. From this directory, open the **Behavioral-Analysis-2025.Rproj** file in RStudio.
 
 To install the required R packages, run this command in the interactive console:
 
 ```         
-install.packages(c('ggplot2', 'cowplot))
+install.packages(c('ggplot2', 'cowplot'))
 ```
 
 Open the **daily_script.R** file in the editor.
