@@ -44,7 +44,7 @@ After the repository has been cloned to your computer, navigate to the directory
 
 You should see a screen that looks something like this:
 
-![image](https://github.com/user-attachments/assets/ce9e0d8c-0d4c-4a9d-abac-53a8190d35dc)
+![Newly opened project in RStudio](https://github.com/user-attachments/assets/ce9e0d8c-0d4c-4a9d-abac-53a8190d35dc)
 
 To install the required R packages, run this command in the interactive console on the left:
 
@@ -66,7 +66,7 @@ For example, this experiment that was run on spiders of species *Larinioides cor
 
 The top of your **daily_script.R** file should look something like this:
 
-![image](https://github.com/user-attachments/assets/da9a8ee6-631d-4261-adfa-c2b7a73066ab)
+![Lines of the R file with the data path and subfolder name set](https://github.com/user-attachments/assets/da9a8ee6-631d-4261-adfa-c2b7a73066ab)
 
 ### Running the Script
 
@@ -80,4 +80,9 @@ The script will generate text in your R console, as well as raster plots in a fo
 
 Example output:
 
-![image](https://github.com/user-attachments/assets/dd54181a-e6f9-447e-a799-914567cf8e8a)
+![Console output listing each tube as active, inactive, or empty; as well as a folder with 13 generated raster plots](https://github.com/user-attachments/assets/dd54181a-e6f9-447e-a799-914567cf8e8a)
+
+One of the generated raster plots might look something like this:
+
+![Raster plot with ZT (hours) on the x-axis and Day on the y-axis showing seven days of constant darkness followed by 9 days of light-dark cycle](https://github.com/user-attachments/assets/a8b6644a-8f87-4faa-8cb4-4f84c4ad8837)
+
