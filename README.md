@@ -17,11 +17,19 @@ This project depends on the following R packages:
 
 *NOTE: these instructions are written with Windows in mind*
 
-Start by cloning the github repository to your computer. If you do not have git installed, it can be downloaded from <https://git-scm.com/downloads>. In the directory where you want your repository, open a terminal and run this command:
+First, you will need to install the following software on your device, if you don't already have it installed:
+
+-   git: <https://git-scm.com/downloads>
+-   R: <https://cran.rstudio.com/>
+-   RStudio: <https://posit.co/download/rstudio-desktop/>
+
+Start by cloning the github repository to your computer. In the directory where you want your repository, open a terminal and run this command:
 
 ```         
 git clone https://github.com/Toporikova-Lab/Behavioral-Analysis-2025
 ```
+
+If git prompts you for authentication, use your browser to sign into github.
 
 After the repository has been cloned to your computer, navigate to the directory it was cloned into. This should be called **Behavioral-Analysis-2025/**. From this directory, open the **Behavioral-Analysis-2025.Rproj** file in RStudio.
 
