@@ -39,4 +39,4 @@ Paste this path in place of the "--FILENAME HERE--" at the top of the **daily_sc
 
 To run the script, use `Ctrl` + `Shift` + `Enter` while in the editor.
 
-The script will generate text in your R console, as well as raster plots in a folder named **generated_plots/**.
+The script will generate text in your R console, as well as raster plots in a folder named **output/generated_plots/**.
