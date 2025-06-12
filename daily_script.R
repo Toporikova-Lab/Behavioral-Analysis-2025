@@ -1,9 +1,9 @@
-source('Raster plot/process.R')
-source('Raster plot/death_detection.R')
+source('R/process.R')
+source('R/death_detection.R')
 
-filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Raw Monitor Data/2025-6-11/Monitor1.txt"
+filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/2025-6-12/Monitor1.txt"
 
-subfolder_name <- "LC_2025-06-09_06-11_1"
+subfolder_name <- "LC_2025-06-09_06-12_1"
 
 data <- process(filename)
 
