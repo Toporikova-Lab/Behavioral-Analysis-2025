@@ -13,7 +13,7 @@ process <- function(filename, header=FALSE, sep='\t') {
   
   colnames(df) <- c("index", "date", "time", "status", "extras", "monitor", "tube", "dtype", "_", "light", spider_ids)
   
-  df$datetime <- paste(df$date, df$time) %>% ymd_hms()
+  df$datetime <- paste(df$date, df$time) %>% dmy_hms()
   
   new_columns <- c("datetime", "status", "light", spider_ids)
   
