@@ -3,21 +3,14 @@ library(lubridate)
 library(dplyr)
 
 process <- function(filename, header=FALSE, sep='\t') {
-  df <- read.csv(filename, header, sep)
-  
-  df <- df %>% na.omit()
-  
   spider_ids <- paste0("s", 1:32)
+  new_cols <- c("index", "date", "time", "status", "extras", "monitor", "tube", "dtype", "_", "light", spider_ids)
   
-  datetime_format <- "%d %b %y %H:%M:%S"
-  
-  colnames(df) <- c("index", "date", "time", "status", "extras", "monitor", "tube", "dtype", "_", "light", spider_ids)
-  
-  df$datetime <- paste(df$date, df$time) %>% dmy_hms()
-  
-  new_columns <- c("datetime", "status", "light", spider_ids)
-  
-  return(df[new_columns])
+  df <- read.csv(filename, header, sep) %>%
+    `colnames<-`(new_cols) %>%
+    na.omit() %>%
+    mutate(datetime = dmy_hms(paste(date, time))) %>%
+    select(datetime, status, light, all_of(spider_ids))
 }
 
 lineplot <- function(data, spiderid) {
