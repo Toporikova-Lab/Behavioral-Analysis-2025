@@ -72,7 +72,11 @@ rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt 
              height=.8,
              fill=scales::colour_ramp(c("#ffffff00", "#000000"))(data[,spiderid] > 0)
     ) +
-    theme(legend.position = "none") +
+    geom_rect(mapping=aes(xmin=0, xmax=24, ymin=zt_day - .4, ymax=zt_day + .4, fill=0), color="#000000") +
+    theme(legend.position = "none",
+          panel.background = element_rect(fill="#ffffff"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()) +
     ggtitle(plot_title) +
     xlab('ZT (hrs)') +
     ylab('Day')
