@@ -58,15 +58,7 @@ Locate the monitor data file that you want to use, and copy its file path.
 
 Paste this path in place of the "--FILENAME HERE--" at the top of the **daily_script.R** file. Make sure to use forward slashes instead of backslashes in the path.
 
-In place of the "--SUBFOLDER NAME HERE--", put the experiment label. It should be of the form:
-
-`[ID]_[start yyyy-mm-dd]_[data collection mm-dd]_[monitor number]`
-
-For example, this experiment that was run on spiders of species *Larinioides cornutus* from 24 September 2024 to 10 October 2024 in Monitor #2 should be labeled `LC_2024-09-24_10-10_2`.
-
 The top of your **daily_script.R** file should look something like this:
-
-![Lines of the R file with the data path and subfolder name set](https://github.com/user-attachments/assets/da9a8ee6-631d-4261-adfa-c2b7a73066ab)
 
 ### Running the Script
 

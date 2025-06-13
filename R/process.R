@@ -26,28 +26,36 @@ lineplot <- function(data, spiderid) {
     geom_ribbon(aes(ymin=0, ymax=(get(spiderid)>0)*1), stat="identity", fill="#101010")
 }
 
-rasterplot <- function(data, spiderid, zt_0 = NULL, start_dt = NULL, end_dt = NULL) {
-  datetime <- data$datetime
-  
+rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt = NULL, end_dt = NULL) {
   if (is.null(start_dt)) {
-    start_dt <- datetime[1]
+    start_dt <- data$datetime
   }
+  
   if (is.null(end_dt)) {
-    end_dt <- tail(datetime, 1)
+    end_dt <- data$datetime %>% last()
   }
   
   if (is.null(zt_0)) {
-    zt_0 <- data$datetime[diff(data$light, 1) == 1][1] # first time light turns on
+    # get first time light turns on
+    zt_0 <- data %>%
+      filter(light - lag(light) == 1) %>%
+      pull(datetime) %>%
+      first()
   }
   else {
     zt_0 <- hm(zt_0)
   }
   
-  diff <- difftime(datetime, zt_0, units='days')
+  if (is.null(plot_title)) {
+    plot_title <- paste('Activity for', spiderid)
+  }
   
-  data$zt_day <- floor(diff) - floor(diff[1]) + 1
-  
-  data$zt_time <- (as.numeric(diff) %% 1) * 24
+  data <- data %>%
+    mutate(
+      diff = difftime(datetime, zt_0, units='days'),
+      zt_day = floor(diff) - floor(diff[1]) + 1,
+      zt_time = (as.numeric(diff) %% 1) * 24
+    )
   
   y_breaks <- unique(data$zt_day)
   x_breaks <- seq(0, 24, 3)
@@ -65,7 +73,7 @@ rasterplot <- function(data, spiderid, zt_0 = NULL, start_dt = NULL, end_dt = NU
              fill=scales::colour_ramp(c("#ffffff00", "#000000"))(data[,spiderid] > 0)
     ) +
     theme(legend.position = "none") +
-    ggtitle(paste('Activity for ', spiderid)) +
+    ggtitle(plot_title) +
     xlab('ZT (hrs)') +
     ylab('Day')
 }
