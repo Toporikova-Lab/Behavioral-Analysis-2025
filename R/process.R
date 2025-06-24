@@ -53,11 +53,11 @@ rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt 
   y_breaks <- unique(data$zt_day)
   x_breaks <- seq(0, 24, 3)
   
-  ggplot(data, aes(x = zt_time, y = zt_day)) +
-    geom_tile(aes(fill=light), width=1/60, height=.8) +
+  ggplot(data, aes(xmin=zt_time, xmax=zt_time + 1/60, ymin=zt_day - .4, ymax=zt_day + .4)) +
+    geom_rect(mapping=aes(fill=light)) +
     scale_y_reverse(breaks=y_breaks) +
     scale_x_continuous(breaks=x_breaks) +
-    scale_fill_gradientn(colours=c("#ffffff00", "#ffff66")) +
+    scale_fill_gradientn(colors=c("transparent", "#ffff00")) +
     annotate(geom="tile",
              x=data$zt_time,
              y=data$zt_day,
