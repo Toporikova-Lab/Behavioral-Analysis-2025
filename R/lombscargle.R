@@ -9,6 +9,12 @@ signal <- sin(2 * pi * time / 24) + rnorm(length(time), sd = 0.5)
 result <- lsp(x = signal, times = time, from = 14, to = 34, type = "period", ofac = 10, plot = FALSE)
 df <- data.frame(Period = result$scanned, Amplitude = result$power)
 
+df %>% 
+  filter(Amplitude == max(Amplitude)) %>%
+  pull(Period) %>%
+  first() %>%
+  print()
+
 ggplot(df, aes(x = Period, y = Amplitude)) +
   geom_line(color = "#0073C2FF", size = 0.6) +
   geom_hline(yintercept = 0.05, color = "#33CC33", linewidth = 0.4) +
