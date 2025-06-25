@@ -4,7 +4,7 @@ library(stringr)
 source('R/process.R')
 source('R/death_detection.R')
 
-filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/LC_2025-06-09_1"
+filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/LC_2025-06-09_1/LC_2025-06-09_06-24_1.txt"
 
 subfolder_name <- filename %>% 
   str_split_1('/') %>% 
