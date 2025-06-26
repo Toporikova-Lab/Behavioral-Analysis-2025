@@ -56,24 +56,32 @@ In the bottom right file viewer, you should see a file called **daily_script.R**
 
 Locate the monitor data file that you want to use, and copy its file path.
 
-Paste this path in place of the "--FILENAME HERE--" at the top of the **daily_script.R** file. Make sure to use forward slashes instead of backslashes in the path.
+Set this path as the `filename` variable at the top of the **daily_script.R** file. Make sure to use forward slashes instead of backslashes in the path.
 
-Also set the section 2 start day. For example, if you are looking at this LD to DD experiment, day 7 is the first day of DD, so set it as 7.
+Also set the `section2_start_day` variable. For example, if you are looking at this LD to DD experiment, day 7 is the first day of DD:
+
+![Actogram showing 6 days LD and the 5 days DD, with an arrow pointing to day 7](https://github.com/user-attachments/assets/9cdd79ee-9431-4247-bfa6-3dbb19a1fd0f)
+
+So set the variable to 7.
 
 The top of your **daily_script.R** file should look something like this:
+
+![image](https://github.com/user-attachments/assets/50289d17-ae12-47f8-a400-1e50424551ef)
 
 ### Running the Script
 
 To run the script, use `Ctrl` + `Shift` + `Enter` while in the editor.
 
-The script will generate text in your R console, as well as raster plots in a folder named **output/generated_plots/**.
+The script will generate text in your R console, as well as combined actograms/periodograms in a folder named **output/generated_plots/**.
 
-"Active" means that the spider moved within the last 24 hours before the data was collected, and so is almost certainly alive.
+"ACTIVE" means that the spider moved within the last 24 hours before the data was collected, and so is almost certainly alive.
 
-"Inactive" means that the spider has not moved in this period, and might be dead. Check the generated raster plot for further confirmation.
+"INACTIVE" means that the spider has not moved in this period, and might be dead. Check the generated plot for further confirmation.
 
 Example output:
 
-![Console output listing each tube as active, inactive, or empty; as well as a folder with 13 generated raster plots](https://github.com/user-attachments/assets/dd54181a-e6f9-447e-a799-914567cf8e8a)
+![Console output listing each tube as active, inactive, or empty; as well as a folder with 13 generated plots](https://github.com/user-attachments/assets/dd54181a-e6f9-447e-a799-914567cf8e8a)
 
-One of the generated raster plots might look something like this:
+One of the generated combined plots might look like this:
+
+![{8342BC35-C404-4F3C-A1C4-9D446612DF08}](https://github.com/user-attachments/assets/e51465a2-46d5-4138-9c26-0a0f4c99bd3b)
