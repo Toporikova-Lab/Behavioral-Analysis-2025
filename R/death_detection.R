@@ -1,26 +1,29 @@
+library(dplyr)
+
 check_activity <- function(data, spiderid, end_dt=NULL, cutoff_hrs=24) {
   if (is.null(end_dt)) {
-    end_dt <- tail(data$datetime, 1)
+    end_dt <- data$datetime %>% last()
   }
   
-  data_active <- data[data[,spiderid] != 0 & data$datetime <= end_dt,]
+  active_dts <- data %>%
+    filter(get(spiderid) != 0 & data$datetime <= end_dt) %>%
+    pull(datetime)
   
-  last_dt <- tail(data_active$datetime, 1)
+  if (length(active_dts) == 0) {
+    'EMPTY'
+  }
+  else if ((end_dt - active_dts %>% last()) < as.difftime('24:00:00')) {
+    'ACTIVE'
+  }
+  else {
+    'INACTIVE'
+  }
   
-  (end_dt - last_dt) < as.difftime('24:00:00')
 }
 
 check_activity_all <- function(data, end_dt=NULL, cutoff_hrs=24) {
   ids <- paste0('s', 1:32)
   sapply(ids, function(id) {
-    if (all(data[,id] == 0)) {
-      return('EMPTY')
-    }
-    
-    is_active <- check_activity(data, id)
-    if (is_active) {
-      return('ACTIVE')
-    }
-    return('INACTIVE')
+    check_activity(data, id, end_dt, cutoff_hrs)
   })
 }

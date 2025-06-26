@@ -5,8 +5,6 @@ library(dplyr)
 library(lubridate)
 source('R/process.R')
 
-spiderid = 's1'
-
 lsp_plot <- function(data, spiderid, title, time_start=NULL, time_end=NULL, period_from=14, period_to=34, alpha=.01) {
   if (is.null(time_start)) {
     time_start <- data$datetime %>% first()
@@ -18,7 +16,7 @@ lsp_plot <- function(data, spiderid, title, time_start=NULL, time_end=NULL, peri
   result <- data %>%
     filter(datetime >= time_start & datetime <= time_end) %>%
     select(datetime, all_of(spiderid)) %>%
-    lsp(from=period_from*3600, to=period_to*3600, type='period', ofac=10, plot=FALSE, alpha=alpha)
+    lsp(from=period_from*3600, to=period_to*3600, type='period', ofac=20, plot=FALSE, alpha=alpha)
   
   df <- data.frame(period = result$scanned / 3600, power = result$power)
   
@@ -33,8 +31,12 @@ lsp_plot <- function(data, spiderid, title, time_start=NULL, time_end=NULL, peri
     geom_vline(xintercept=peak_period, color='red', linewidth=1) +
     annotate('text', x=peak_period, y=result$peak, hjust=1.1, vjust=-.25, color='red', label=str_interp('Period: ${round(peak_period, 2)} hr')) +
     annotate('text', x=peak_period, y=result$peak, hjust=-.1, vjust=-.25, color='black', label=str_interp('p-value: ${signif(result$p.value, 3)}')) +
-    annotate('text', x=period_to, y=result$sig.level, hjust=1, vjust=-1, color='black', label=str_interp('Significance level: ${alpha}')) +
+    annotate('text', x=period_to, y=result$sig.level, hjust=1, vjust=-1, color='black', label=str_interp('Alpha=${alpha}')) +
     scale_x_continuous(breaks=period_from:period_to) +
+    theme(panel.background = element_rect(fill="#ffffff"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()) +
+    ylim(0, max(1.25 * result$sig.level, 1.25 * result$peak)) +
     xlab('Period (hrs)') +
     ylab('Periodogram Power') +
     ggtitle(title)
@@ -67,12 +69,8 @@ combined_plot <- function(data, spiderid, start_zt_day, transition_zt_day) {
   
   rplot <- rasterplot(data, spiderid)
   
-  grid.arrange(
+  arrangeGrob(
     ld_plot, dd_plot, rplot,
     layout_matrix = rbind(c(1, 3),
                           c(2, 3)))
 }
-
-# Must load data into interactive session before sourcing this file, or else it will error
-
-combined_plot(data, 's2', 2, 8)

@@ -1,26 +1,31 @@
 library(dplyr)
 library(stringr)
 
-source('R/process.R')
+source('R/lsp_test.R')
 source('R/death_detection.R')
 
-filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/LC_2025-06-09_1/LC_2025-06-09_06-24_1.txt"
+filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/test-data/Monitor2.txt"
 
 subfolder_name <- filename %>% 
   str_split_1('/') %>% 
   last() %>%
   str_remove('.txt')
 
-name_ref <- filename %>%
+name_ref_file <- filename %>%
   str_split_1('/') %>%
   head(-1) %>%
   append('name_ref.csv') %>%
-  str_c(collapse='/') %>%
-  read.csv()
-
-data <- process(filename)
+  str_c(collapse='/')
 
 ids <- paste0('s', 1:32)
+
+if (file.exists(name_ref_file)) {
+  name_ref <- read.csv(name_ref_file)
+} else {
+  name_ref <- data.frame(id=ids, name=ids)
+}
+
+data <- process(filename)
 
 for (spiderid in ids) {
   name <- name_ref %>%
@@ -28,19 +33,17 @@ for (spiderid in ids) {
     pull(name)
   
   if (length(name) == 0) {
-    print(paste(spiderid, ': Tube Empty, Skipping'))
+    print(str_interp('${spiderid}: EMPTY'))
   }
   else {
-    is_active <- check_activity(data, spiderid)
-    if (!is.na(is_active) & is_active) {
-      print(paste(spiderid, ': Active'))
+    activity <- check_activity(data, spiderid)
+
+    print(str_interp('${spiderid}: ${activity}'))
+    if (activity != 'EMPTY') {
+      generated_plot <- combined_plot(data, spiderid, 2, 8)
+      
+      image_file = str_interp('./output/generated_plots/${subfolder_name}/${subfolder_name}_${spiderid}_combined.png')
+      ggsave(image_file, generated_plot, width=10, height=6, units='in', create.dir = TRUE)
     }
-    else {
-      print(paste(spiderid, ': Inactive'))
-    }
-    generated_plot <- rasterplot(data, spiderid, paste('Activity for', name))
-    
-    image_file = sprintf('./output/generated_plots/%s/%s_%s_raster.png', subfolder_name, subfolder_name, spiderid)
-    ggsave(image_file, width=7, height=4, units='in', create.dir = TRUE)
   }
 }

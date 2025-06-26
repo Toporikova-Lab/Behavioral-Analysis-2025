@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+Rprof.out
 
 output/
 Data/Raw Video Data/
