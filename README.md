@@ -58,6 +58,8 @@ Locate the monitor data file that you want to use, and copy its file path.
 
 Paste this path in place of the "--FILENAME HERE--" at the top of the **daily_script.R** file. Make sure to use forward slashes instead of backslashes in the path.
 
+Also set the section 2 start day. For example, if you are looking at this LD to DD experiment, day 7 is the first day of DD, so set it as 7.
+
 The top of your **daily_script.R** file should look something like this:
 
 ### Running the Script
@@ -75,5 +77,3 @@ Example output:
 ![Console output listing each tube as active, inactive, or empty; as well as a folder with 13 generated raster plots](https://github.com/user-attachments/assets/dd54181a-e6f9-447e-a799-914567cf8e8a)
 
 One of the generated raster plots might look something like this:
-
-![Raster plot with ZT (hours) on the x-axis and Day on the y-axis showing seven days of constant darkness followed by 9 days of light-dark cycle](https://github.com/user-attachments/assets/a8b6644a-8f87-4faa-8cb4-4f84c4ad8837)

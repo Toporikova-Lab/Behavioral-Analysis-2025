@@ -88,8 +88,8 @@ rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt 
     mutate(start_time=0) %>%
     bind_rows(df_1)
   
-  ggplot(data, aes(xmin=zt_time, xmax=zt_time + 1/60, ymin=zt_day - .4, ymax=zt_day + .4)) +
-    geom_rect(mapping=aes(fill=color)) +
+  ggplot(data, aes(x=zt_time+1/120, width=1/60, y=zt_day, height=.8)) +
+    geom_tile(mapping=aes(fill=color)) +
     scale_y_reverse(breaks=y_breaks) +
     scale_x_continuous(breaks=x_breaks) +
     scale_fill_manual(values=c(none= "#00000000", light="#ffff66", active="#000000", missing='#ff0000')) +

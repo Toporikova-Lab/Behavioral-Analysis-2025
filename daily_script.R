@@ -4,7 +4,8 @@ library(stringr)
 source('R/lsp_test.R')
 source('R/death_detection.R')
 
-filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/test-data/Monitor2.txt"
+filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/LC_2025-06-09_1/LC_2025-06-09_06-24_1.txt"
+section2_start_day = 7
 
 subfolder_name <- filename %>% 
   str_split_1('/') %>% 
@@ -40,7 +41,7 @@ for (spiderid in ids) {
 
     print(str_interp('${spiderid}: ${activity}'))
     if (activity != 'EMPTY') {
-      generated_plot <- combined_plot(data, spiderid, 2, 8)
+      generated_plot <- combined_plot(data, spiderid, 2, section2_start_day)
       
       image_file = str_interp('./output/generated_plots/${subfolder_name}/${subfolder_name}_${spiderid}_combined.png')
       ggsave(image_file, generated_plot, width=10, height=6, units='in', create.dir = TRUE)
