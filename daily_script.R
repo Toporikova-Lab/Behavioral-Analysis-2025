@@ -12,38 +12,39 @@ subfolder_name <- filename %>%
   last() %>%
   str_remove('.txt')
 
-name_ref_file <- filename %>%
+monitor_log_file <- filename %>%
   str_split_1('/') %>%
   head(-1) %>%
-  append('name_ref.csv') %>%
+  append('monitor_log.csv') %>%
   str_c(collapse='/')
 
-ids <- paste0('s', 1:32)
-
-if (file.exists(name_ref_file)) {
-  name_ref <- read.csv(name_ref_file)
+if (file.exists(monitor_log_file)) {
+  monitor_log <- read.csv(monitor_log_file)
 } else {
-  name_ref <- data.frame(id=ids, name=ids)
+  monitor_log <- data.frame(channel=1:32, id=paste0('s', 1:32))
 }
 
 data <- process(filename)
 
-spider_data = data.frame(id=character(), name=character(), peak_period_1=numeric(), peak_period_2=numeric(), activity_status=character(), activity_proportion=numeric())
+spider_data = data.frame(channel=numeric(), name=character(), peak_period_1=numeric(), peak_period_2=numeric(), activity_status=character(), activity_proportion=numeric())
 
-for (spiderid in ids) {
-  name <- name_ref %>%
-    filter(id == spiderid) %>%
-    pull(name)
+for (sp_channel in 1:32) {
+  spiderid <- paste0('s', sp_channel)
+  
+  name <- monitor_log %>%
+    filter(channel == sp_channel) %>%
+    pull(id)
   
   if (length(name) == 0) {
-    print(str_interp('${spiderid}: EMPTY'))
+    print(str_interp('Channel ${sp_channel}: EMPTY'))
   }
   else {
     activity <- check_activity(data, spiderid)
     
-    print(str_interp('${spiderid}: ${activity}'))
+    print(str_interp('Channel ${sp_channel}: ${activity}'))
+    
     if (activity != 'EMPTY') {
-      combined <- combined_plot(data, spiderid, 2, section2_start_day, return_peaks=TRUE)
+      combined <- combined_plot(data, spiderid, 2, section2_start_day, return_peaks=TRUE, actogram_title=str_interp('Activity for ${name}'))
       
       activity_proportion = data %>%
         filter(get(spiderid) > 0) %>%
@@ -52,7 +53,7 @@ for (spiderid in ids) {
       
       spider_data <- spider_data %>%
         add_row(
-          id = spiderid,
+          channel = channel,
           name = name,
           peak_period_1 = combined$peak1,
           peak_period_2 = combined$peak2,
@@ -64,7 +65,7 @@ for (spiderid in ids) {
       ggsave(image_file, combined$plot, width=10, height=6, units='in', create.dir = TRUE)
     }
   }
-  
-  data_file = str_interp('./output/${subfolder_name}/data.csv')
-  write.csv(spider_data, data_file, row.names=FALSE)
 }
+
+data_file = str_interp('./output/${subfolder_name}/data.csv')
+write.csv(spider_data, data_file, row.names=FALSE)
