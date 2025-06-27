@@ -28,6 +28,8 @@ if (file.exists(name_ref_file)) {
 
 data <- process(filename)
 
+spider_data = data.frame(id=character(), name=character(), peak_period_1=numeric(), peak_period_2=numeric(), activity_status=character(), activity_proportion=numeric())
+
 for (spiderid in ids) {
   name <- name_ref %>%
     filter(id == spiderid) %>%
@@ -38,13 +40,31 @@ for (spiderid in ids) {
   }
   else {
     activity <- check_activity(data, spiderid)
-
+    
     print(str_interp('${spiderid}: ${activity}'))
     if (activity != 'EMPTY') {
-      generated_plot <- combined_plot(data, spiderid, 2, section2_start_day)
+      combined <- combined_plot(data, spiderid, 2, section2_start_day, return_peaks=TRUE)
       
-      image_file = str_interp('./output/generated_plots/${subfolder_name}/${subfolder_name}_${spiderid}_combined.png')
-      ggsave(image_file, generated_plot, width=10, height=6, units='in', create.dir = TRUE)
+      activity_proportion = data %>%
+        filter(get(spiderid) > 0) %>%
+        nrow() /
+        nrow(data)
+      
+      spider_data <- spider_data %>%
+        add_row(
+          id = spiderid,
+          name = name,
+          peak_period_1 = combined$peak1,
+          peak_period_2 = combined$peak2,
+          activity_status = activity,
+          activity_proportion = activity_proportion
+        )
+      
+      image_file = str_interp('./output/${subfolder_name}/${subfolder_name}_${spiderid}_combined.png')
+      ggsave(image_file, combined$plot, width=10, height=6, units='in', create.dir = TRUE)
     }
   }
+  
+  data_file = str_interp('./output/${subfolder_name}/data.csv')
+  write.csv(spider_data, data_file, row.names=FALSE)
 }

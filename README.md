@@ -49,7 +49,7 @@ You should see a screen that looks something like this:
 To install the required R packages, run this command in the interactive console on the left:
 
 ```         
-install.packages("tidyverse")
+install.packages(c('tidyverse', 'gridExtra', 'lomb'))
 ```
 
 In the bottom right file viewer, you should see a file called **daily_script.R**. Open this file in the editor.

@@ -5,7 +5,7 @@ library(dplyr)
 library(lubridate)
 source('R/process.R')
 
-lsp_plot <- function(data, spiderid, title, time_start=NULL, time_end=NULL, period_from=14, period_to=34, alpha=.01) {
+lsp_plot <- function(data, spiderid, title, time_start=NULL, time_end=NULL, period_from=14, period_to=34, alpha=.01, return_peak=FALSE) {
   if (is.null(time_start)) {
     time_start <- data$datetime %>% first()
   }
@@ -25,7 +25,7 @@ lsp_plot <- function(data, spiderid, title, time_start=NULL, time_end=NULL, peri
   
   peak_period <- result$peak.at[1]/3600
   
-  ggplot(df, aes(x=period)) +
+  plot <- ggplot(df, aes(x=period)) +
     geom_line(aes(y=power)) +
     geom_hline(yintercept=result$sig.level, color='green', linewidth=1) +
     geom_vline(xintercept=peak_period, color='red', linewidth=1) +
@@ -40,9 +40,16 @@ lsp_plot <- function(data, spiderid, title, time_start=NULL, time_end=NULL, peri
     xlab('Period (hrs)') +
     ylab('Periodogram Power') +
     ggtitle(title)
+  
+  if (return_peak) {
+    list(plot=plot, peak=peak_period)
+  }
+  else {
+    plot
+  }
 }
 
-combined_plot <- function(data, spiderid, start_zt_day, transition_zt_day) {
+combined_plot <- function(data, spiderid, start_zt_day, transition_zt_day, return_peaks=FALSE) {
   zt_0 <- data %>%
     filter(light - lag(light) == 1) %>%
     pull(datetime) %>%
@@ -64,13 +71,19 @@ combined_plot <- function(data, spiderid, start_zt_day, transition_zt_day) {
     pull(datetime) %>%
     first()
   
-  ld_plot <- lsp_plot(data, spiderid, 'Section 1 Periodogram', start_dt, transition_dt)
-  dd_plot <- lsp_plot(data, spiderid, 'Section 2 Periodogram', transition_dt + days(1))
+  section1 <- lsp_plot(data, spiderid, 'Section 1 Periodogram', start_dt, transition_dt, return_peak = return_peaks)
+  section2 <- lsp_plot(data, spiderid, 'Section 2 Periodogram', transition_dt + days(1), return_peak = return_peaks)
   
   rplot <- rasterplot(data, spiderid)
-  
-  arrangeGrob(
-    ld_plot, dd_plot, rplot,
+  combined_plot <- arrangeGrob(
+    section1$plot, section2$plot, rplot,
     layout_matrix = rbind(c(1, 3),
                           c(2, 3)))
+  
+  if (return_peaks) {
+    list(plot=combined_plot, peak1=section1$peak, peak2=section2$peak)
+  }
+  else {
+    combined_plot
+  }
 }
