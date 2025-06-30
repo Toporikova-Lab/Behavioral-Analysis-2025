@@ -4,10 +4,11 @@ library(stringr)
 source('R/lsp_test.R')
 source('R/death_detection.R')
 
-filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/LC_2025-06-27_2/LC2025_06-27_06-30_2.txt"
-section2_start_day = 3
+filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/LC_2025-06-09_1/LC_2025-06-09_06-24_1.txt"
+section2_start_day = 7
 
-rasterplots_only = TRUE
+rasterplots_only = FALSE
+
 
 subfolder_name <- filename %>% 
   str_split_1('/') %>% 
@@ -32,7 +33,7 @@ if (rasterplots_only) {
   spider_data <- data.frame(channel=numeric(), name=character(), activity_status=character(), activity_proportion=numeric())
 } else {
   spider_data <- data.frame(channel=numeric(), name=character(), peak_period_1=numeric(), peak_period_2=numeric(), activity_status=character(), activity_proportion=numeric())
-}
+}                  
 
 for (sp_channel in 1:32) {
   spiderid <- paste0('s', sp_channel)
@@ -83,7 +84,7 @@ for (sp_channel in 1:32) {
             activity_proportion = activity_proportion
           )
         
-        image_file = str_interp('./output/${subfolder_name}/${subfolder_name}_${spiderid}_combined.png')
+        image_file <- str_interp('./output/${subfolder_name}/${subfolder_name}_${spiderid}_combined.png')
         
         ggsave(image_file, combined$plot, width=10, height=6, units='in', create.dir = TRUE)
       }
@@ -93,3 +94,24 @@ for (sp_channel in 1:32) {
 
 data_file = str_interp('./output/${subfolder_name}/data.csv')
 write.csv(spider_data, data_file, row.names=FALSE)  
+
+if (!rasterplots_only) {
+  zt_0 <- data %>%
+    filter(light - lag(light) == 1) %>%
+    pull(datetime) %>%
+    first()
+  
+  data <- data %>%
+    mutate(
+      diff = difftime(datetime, zt_0, units='days'),
+      zt_day = floor(diff) - floor(diff[1]) + 1
+    )
+  data_ld <- data %>% filter(zt_day < section2_start_day) %>% select(!c(diff, zt_day))
+  data_dd <- data %>% filter(zt_day >= section2_start_day) %>% select(!c(diff, zt_day))
+  
+  ld_file <- str_interp('./output/${subfolder_name}/${subfolder_name}_LD.csv')
+  dd_file <- str_interp('./output/${subfolder_name}/${subfolder_name}_DD.csv')
+  
+  write.csv(data_ld, ld_file, row.names = FALSE)
+  write.csv(data_dd, dd_file, row.names = FALSE)
+}

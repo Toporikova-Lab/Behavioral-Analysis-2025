@@ -10,9 +10,13 @@ Using the DAMSystem3 data collection software, we are monitoring the locomotor a
 
 This project depends on the following R packages:
 
--   ggplot2
--   lubridate
--   dplyr
+-   tidyverse
+    -   ggplot2
+    -   dplyr
+    -   lubridate
+    -   stringr
+-   lomb
+-   gridExtra
 
 ## Instructions for Using the Daily Script
 
@@ -54,25 +58,31 @@ install.packages(c('tidyverse', 'gridExtra', 'lomb'))
 
 In the bottom right file viewer, you should see a file called **daily_script.R**. Open this file in the editor.
 
-Locate the monitor data file that you want to use, and copy its file path.
+Locate the monitor data file that you want to use, and copy its file path. This can be quickly done in RStudio by opening the data file in the editor, right clicking on the tab name at the top, and clicking "Copy Path":
 
 Set this path as the `filename` variable at the top of the **daily_script.R** file. Make sure to use forward slashes instead of backslashes in the path.
 
-Also set the `section2_start_day` variable. For example, if you are looking at this LD to DD experiment, day 7 is the first day of DD:
+You can also set whether you want to only generate actograms, or whether you want to generate combined plots that also include periodograms. If you want to generate combined plots, set `rasterplots_only` to FALSE. If you only want actograms, set it to TRUE.
+
+If you are generating combined plots, set the `section2_start_day` variable. For example, if you are looking at this LD to DD experiment, day 7 is the first day of DD:
 
 ![Actogram showing 6 days LD and the 5 days DD, with an arrow pointing to day 7](https://github.com/user-attachments/assets/9cdd79ee-9431-4247-bfa6-3dbb19a1fd0f)
 
 So set the variable to 7.
 
+If you are only generating actograms, then this variable is unused, so setting it does not matter.
+
 The top of your **daily_script.R** file should look something like this:
 
-![image](https://github.com/user-attachments/assets/50289d17-ae12-47f8-a400-1e50424551ef)
+![Definitions for filename and section2_start_day variables](https://github.com/user-attachments/assets/50289d17-ae12-47f8-a400-1e50424551ef)
 
 ### Running the Script
 
 To run the script, use `Ctrl` + `Shift` + `Enter` while in the editor.
 
-The script will generate text in your R console, as well as combined actograms/periodograms in a folder named **output/generated_plots/**.
+The script will generate text in your R console, as well as combined actograms/periodograms in a folder named **output/**.
+
+If you set `rasterplots_only` to FALSE, the program will also generate two more csv files with the data split into the two sections you defined.
 
 "ACTIVE" means that the spider moved within the last 24 hours before the data was collected, and so is almost certainly alive.
 
