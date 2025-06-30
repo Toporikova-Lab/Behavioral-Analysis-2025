@@ -60,6 +60,9 @@ In the bottom right file viewer, you should see a file called **daily_script.R**
 
 Locate the monitor data file that you want to use, and copy its file path. This can be quickly done in RStudio by opening the data file in the editor, right clicking on the tab name at the top, and clicking "Copy Path":
 
+![Right-click menu on the file name tab, with the Copy Path option highlighted](https://github.com/user-attachments/assets/399c73cd-9c4f-490e-b33f-a688351a7a32)
+
+
 Set this path as the `filename` variable at the top of the **daily_script.R** file. Make sure to use forward slashes instead of backslashes in the path.
 
 You can also set whether you want to only generate actograms, or whether you want to generate combined plots that also include periodograms. If you want to generate combined plots, set `rasterplots_only` to FALSE. If you only want actograms, set it to TRUE.
