@@ -41,10 +41,16 @@ rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt 
   
   if (is.null(zt_0)) {
     # get first time light turns on
-    zt_0 <- data %>%
+    light_changes <- data %>%
       filter(light - lag(light) == 1) %>%
-      pull(datetime) %>%
-      first()
+      pull(datetime)
+    
+    if (light_changes %>% length() != 0) {
+      zt_0 <- light_changes %>% first()
+    }
+    else {
+      zt_0 <- 0
+    }
   }
   else {
     zt_0 <- hm(zt_0)

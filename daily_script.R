@@ -4,10 +4,10 @@ library(stringr)
 source('R/lsp_test.R')
 source('R/death_detection.R')
 
-filename <- "C:/Users/tayoub-winder/Documents/Behavioral-Analysis-2025/Data/Raw Monitor Data/LC_2025-06-09_1/LC_2025-06-09_06-24_1.txt"
+filename <- "C:/Users/tayoub-winder/Downloads/Monitor1.txt"
 section2_start_day = 7
 
-rasterplots_only = FALSE
+rasterplots_only = TRUE
 
 
 subfolder_name <- filename %>% 
