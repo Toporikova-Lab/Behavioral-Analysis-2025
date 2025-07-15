@@ -1,6 +1,7 @@
 library(ggplot2)
 library(deSolve)
 library(lomb)
+library(dplyr)
 
 f <- function(x) {
   1 / (1 + x^9)
@@ -49,10 +50,45 @@ solution_period <- function(df) {
     last()
 }
 
-main <- function(k1) {
+find_coupled_periods <- function(A, B) {
+  dt <- .1
+  
+  time <- seq(0, 24*10, by=dt)
+  
+  state <- c(x1=.02,
+             y1=.2,
+             z1=2,
+             x2=.02,
+             y2=.2,
+             z2=2)
+  
+  params <- c(c1=.1727,
+              c2=.1458,
+              k1=A,
+              k2=B)
+  
+  solution <- ode(state, time, model_coupled, params) %>% data.frame()
+  
+  c(solution %>% mutate(x=x1) %>% solution_period(),
+    solution %>% mutate(x=x2) %>% solution_period())
+}
+
+periods_from_ks <- function() {
+  kvals <- seq(-.15, .15, by=.01)
+  
+  df <- expand.grid(k1=kvals, k2=kvals) %>%
+    data.frame() %>%
+    rowwise() %>%
+    mutate(periods = list(find_coupled_periods(k1, k2))) %>%
+    transmute(k1, k2, period1 = periods[1], period2 = periods[2])
+  
+  df
+}
+
+main <- function() {
   dt <- .01
   
-  time <- seq(0, 24*20, by=dt)
+  time <- seq(0, 24*10, by=dt)
   
   state <- c(x1=.02,
              y1=.2,
@@ -63,8 +99,8 @@ main <- function(k1) {
   
   params <- c(c1=.1727, # 22 hr period
               c2=.1458, # 26 hr period
-              k1=k1, # coupling constants
-              k2=.05-k1)
+              k1=.1, # coupling constants
+              k2=-.05)
   
   solution <- ode(state, time, model_coupled, params) %>% data.frame()
   
