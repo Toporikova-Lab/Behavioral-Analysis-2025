@@ -42,7 +42,7 @@ model_coupled <- function(time, state, params) {
 # df columns: (time, x)
 solution_period <- function(df) {
   df %>%
-    mutate(dx = x %>% diff() %>% c(NA) / dt) %>%
+    mutate(dx = x %>% diff() %>% c(NA) / diff(time) %>% c(NA)) %>%
     na.omit() %>% 
     filter(dx >= 0 & lag(dx) < 0) %>% 
     pull(time) %>% 
@@ -51,9 +51,9 @@ solution_period <- function(df) {
 }
 
 find_coupled_periods <- function(A, B) {
-  dt <- .1
+  dt <- .05
   
-  time <- seq(0, 24*10, by=dt)
+  time <- seq(0, 24*20, by=dt)
   
   state <- c(x1=.02,
              y1=.2,
@@ -69,12 +69,14 @@ find_coupled_periods <- function(A, B) {
   
   solution <- ode(state, time, model_coupled, params) %>% data.frame()
   
+  print(paste(A, B))
+  
   c(solution %>% mutate(x=x1) %>% solution_period(),
     solution %>% mutate(x=x2) %>% solution_period())
 }
 
 periods_from_ks <- function() {
-  kvals <- seq(-.15, .15, by=.01)
+  kvals <- seq(-.15, .2, by=.005)
   
   df <- expand.grid(k1=kvals, k2=kvals) %>%
     data.frame() %>%
@@ -85,7 +87,7 @@ periods_from_ks <- function() {
   df
 }
 
-main <- function() {
+main <- function(k1, k2) {
   dt <- .01
   
   time <- seq(0, 24*10, by=dt)
@@ -99,8 +101,8 @@ main <- function() {
   
   params <- c(c1=.1727, # 22 hr period
               c2=.1458, # 26 hr period
-              k1=.1, # coupling constants
-              k2=-.05)
+              k1=k1, # coupling constants
+              k2=k2)
   
   solution <- ode(state, time, model_coupled, params) %>% data.frame()
   

@@ -81,7 +81,7 @@ rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt 
               zt_time,
               zt_day,
               start_time=lag(zt_time),
-              start_day=lag(zt_day):32
+              start_day=lag(zt_day)
     ) %>%
     filter(datetime %in% missing)
   

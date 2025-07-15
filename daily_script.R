@@ -4,7 +4,7 @@ library(stringr)
 source('R/lsp_test.R')
 source('R/death_detection.R')
 
-filename <- "C:/Users/tayoub-winder/Downloads/MW_2025-07-03_07-10_2.txt"
+filename <- "C:/Users/tayoub-winder/Downloads/MW_2025-07-03_07-15_2.txt"
 section2_start_day = 7
 
 rasterplots_only = TRUE
