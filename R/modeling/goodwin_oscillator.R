@@ -1,27 +1,20 @@
 library(ggplot2)
 library(deSolve)
-library(lomb)
 library(dplyr)
 
 f <- function(x) {
   1 / (1 + x^9)
 }
 
-derivatives <- function(x, y, z, c) {
-  dx <- f(z) - c*x
-  dy <- x - c*y
-  dz <- y - c*z
-  
-  c(dx, dy, dz)
-}
-
 # state: (x, y, z)
 # params: (c,)
 model_single <- function(time, state, params) {
   with(as.list(c(state, params)), {
-    d_state <- derivatives(x, y, z, c)
+    dx <- f(z) - c*x
+    dy <- x - c*y
+    dz <- y - c*z
     
-    list(d_state)
+    list(c(dx, dy, dz))
   })
 }
 
@@ -29,13 +22,15 @@ model_single <- function(time, state, params) {
 # params: (c1, c2, k1, k2)
 model_coupled <- function(time, state, params) {
   with(as.list(c(state, params)), {
-    d1 <- derivatives(x1, y1, z1, c1)
-    d2 <- derivatives(x2, y2, z2, c2)
+    dx1 = f(z1 + k1*z2) - c1*x1
+    dy1 = x1 - c1*y1
+    dz1 = y1 - c1*z1
     
-    d1[1] <- d1[1] + k1*x2
-    d2[1] <- d2[1] + k2*x1
+    dx2 = f(z2 + k2*z1) - c2*x2
+    dy2 = x2 - c2*y2
+    dz2 = y2 - c2*z2
     
-    list(c(d1, d2))
+    list(c(dx1, dy1, dz1, dx2, dy2, dz2))
   })
 }
 
