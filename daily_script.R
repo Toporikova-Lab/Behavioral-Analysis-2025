@@ -4,11 +4,11 @@ library(stringr)
 source('R/lsp_test.R')
 source('R/death_detection.R')
 
-filename <- "C:/Users/tayoub-winder/Downloads/MW_2025-07-03_07-15_2.txt"
+filename <- "C:/Users/tayoub-winder/Downloads/Monitor1_07212025.txt"
 section2_start_day = 7
 
 rasterplots_only = TRUE
-
+zt_0 = ymd_hm('01-1-1 8:00')
 
 subfolder_name <- filename %>% 
   str_split_1('/') %>% 
@@ -57,7 +57,7 @@ for (sp_channel in 1:32) {
         nrow(data)
       
       if (rasterplots_only) {
-        plot <- rasterplot(data, spiderid, plot_title=str_interp('Activity for ${name}'))
+        plot <- rasterplot(data, spiderid, plot_title=str_interp('Activity for ${name}'), zt_0=zt_0)
         
         spider_data <- spider_data %>%
           add_row(
@@ -72,7 +72,7 @@ for (sp_channel in 1:32) {
         ggsave(image_file, plot, width=10, height=6, units='in', create.dir = TRUE)
       }
       else {
-        combined <- combined_plot(data, spiderid, 1, section2_start_day, return_peaks=TRUE, actogram_title=str_interp('Activity for ${name}'))
+        combined <- combined_plot(data, spiderid, 1, section2_start_day, return_peaks=TRUE, zt_0=zt_0, actogram_title=str_interp('Activity for ${name}'))
         
         spider_data <- spider_data %>%
           add_row(

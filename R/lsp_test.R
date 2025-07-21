@@ -49,12 +49,13 @@ lsp_plot <- function(data, spiderid, title, time_start=NULL, time_end=NULL, peri
   }
 }
 
-combined_plot <- function(data, spiderid, start_zt_day, transition_zt_day, actogram_title=NULL, return_peaks=FALSE) {
-  zt_0 <- data %>%
-    filter(light - lag(light) == 1) %>%
-    pull(datetime) %>%
-    first()
-  
+combined_plot <- function(data, spiderid, start_zt_day, transition_zt_day, zt_0=NULL, actogram_title=NULL, return_peaks=FALSE) {
+  if (is.null(zt_0)) {
+    zt_0 <- data %>%
+      filter(light - lag(light) == 1) %>%
+      pull(datetime) %>%
+      first()
+  }
   data <- data %>%
     mutate(
       diff = difftime(datetime, zt_0, units='days'),
@@ -74,7 +75,7 @@ combined_plot <- function(data, spiderid, start_zt_day, transition_zt_day, actog
   section1 <- lsp_plot(data, spiderid, 'Section 1 Periodogram', start_dt, transition_dt, return_peak = return_peaks)
   section2 <- lsp_plot(data, spiderid, 'Section 2 Periodogram', transition_dt + days(1), return_peak = return_peaks)
   
-  rplot <- rasterplot(data, spiderid, plot_title=actogram_title)
+  rplot <- rasterplot(data, spiderid, plot_title=actogram_title, zt_0=zt_0)
   combined_plot <- arrangeGrob(
     section1$plot, section2$plot, rplot,
     layout_matrix = rbind(c(1, 3),

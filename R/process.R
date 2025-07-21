@@ -52,9 +52,6 @@ rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt 
       zt_0 <- 0
     }
   }
-  else {
-    zt_0 <- hm(zt_0)
-  }
   
   if (is.null(plot_title)) {
     plot_title <- paste('Activity for', spiderid)
