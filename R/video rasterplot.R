@@ -117,8 +117,7 @@ analyze_files_fullpath <- function(full_path, save_csv = TRUE) {
   list(df = df)
 }
 
-full_path <- "C:/Users/user/Box/Summer2025_Circadian_Students/Spider behavioral data and analysis/Video recording data/Raw Data/LCF10 0624_0606_25"
-
+full_path <- ("C:/Users/user/Box/Summer2025_Circadian_Students/Spider behavioral data and analysis/Video recording data/Raw data/LcF1 0528_0606_2025/LcF1_0528_0606_2025_binary.csv")
 result <- analyze_files_fullpath(full_path)
 experiment_name <- basename(normalizePath(full_path))
 csv_path <- file.path(full_path, paste0(gsub("[ /]", "_", experiment_name), "_binary.csv"))
@@ -127,8 +126,8 @@ if (file.exists(csv_path)) {
   df <- read_csv(csv_path, show_col_types = FALSE)
   df$datetime <- ymd_hms(df$datetime, quiet = TRUE)
   df <- df[!is.na(df$datetime), ]
-  df_full <- fill_missing_times(df)
-  
+  df_full <- fill_missing_times(df) %>%
+    filter(datetime >= ymd("2025-06-13"))
   p <- plot_one_spider(df_full, title = experiment_name)
   print(p)
   
