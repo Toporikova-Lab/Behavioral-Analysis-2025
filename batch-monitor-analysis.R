@@ -7,7 +7,7 @@
 # run across every group folder.
 # ============================================================
 
-source("batch-monitor-function.R")
+source('batch-monitor-function.R')
 
 # base_dir points at the Box Drive location for the RNA-seq experiment data.
 base_dir <- "/Users/isabelduarte/Library/CloudStorage/Box-Box/Summer2025-2026_Circadian_Students/Spider behavioral data and analysis/Locomotor activity monitor data/MW behavior for RNA-seq experiment/data"
@@ -22,6 +22,10 @@ output_root <- "/Users/isabelduarte/Library/CloudStorage/Box-Box/Summer2025-2026
 groups <- list.dirs(base_dir, recursive = FALSE, full.names = FALSE)
 groups <- groups[!str_starts(groups, "\\.")]  # drop hidden/system folders
 
+# Sample/dissection timing (ZT or CT at sampling, always the spider's
+# last recorded day) - used to draw a dissection-time line on rasters.
+sample_periods <- load_sample_periods("MW_LD_DD_periods.csv")
+
 # Quick check of how many days each file covers (fast, no plots):
 lengths <- check_monitor_lengths(base_dir, groups, output_root = output_root)
 View(lengths)
@@ -35,6 +39,19 @@ View(dd_start_preview)
 # files with more than one LD/DD transition before trusting the full run.
 segments_preview <- check_light_segments(base_dir, groups, output_root = output_root)
 View(segments_preview)
+
+#we need this test
+test_flags <- run_batch_analysis(
+  base_dir            = base_dir,
+  group_folders       = groups[1],   # just the first group
+  section2_start_day  = "auto",
+  dd_days             = NULL,
+  rasterplots_only    = FALSE,
+  dedupe_checkpoints  = TRUE,
+  output_root         = output_root,
+  sample_periods      = sample_periods,
+  zt_0                = "auto"
+)
 
 # Full batch run. section2_start_day = "auto" detects each file's DD
 # start individually; files with 3+ real phases get numbered segment
@@ -51,7 +68,8 @@ flags <- run_batch_analysis(
   dd_days             = NULL,
   rasterplots_only    = FALSE,
   dedupe_checkpoints  = TRUE,
-  output_root         = output_root
+  output_root         = output_root,
+  sample_periods      = sample_periods,
+  zt_0                = "auto"
 )
-
 View(flags)

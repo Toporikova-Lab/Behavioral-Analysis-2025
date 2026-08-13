@@ -22,7 +22,7 @@ library(readxl)      # needed to read .xlsx/.xls monitor logs (install.packages(
 
 source('R/lsp_test.R')
 source('R/death_detection.R')
-
+source('R/process.R')
 
 # ============================================================
 # 2. MONITOR LOG HANDLING
@@ -304,6 +304,30 @@ verify_light_column <- function(filepath, expected_dd_run_length, candidate_cols
   NULL
 }
 
+# ------------------------------------------------------------
+# Sample/dissection timing lookup - spider_id -> ZT or CT at sampling.
+# CT1 == ZT1 (CT just continues ZT's numbering into DD), so whichever
+# of the two is non-NA for a spider can be used directly as its raster
+# x-position.
+# ------------------------------------------------------------
+load_sample_periods <- function(path) {
+  df <- read.csv(path, stringsAsFactors = FALSE)
+  if (any(duplicated(df$spider_id))) {
+    warning("MW_LD_DD_periods.csv has duplicate spider_id values - first match will be used per spider")
+  }
+  df
+}
+
+# ------------------------------------------------------------
+# Normalizes a spider ID for matching between sample_periods$spider_id
+# and monitor_log id/name - the two sources format IDs differently
+# (e.g. monitor log "MwMsA 7" vs CSV "MW_MsA7_": different case,
+# spaces vs underscores, different underscore placement). Strips all
+# spaces/underscores and uppercases so both collapse to the same form.
+# ------------------------------------------------------------
+normalize_spider_id <- function(x) {
+  toupper(gsub('[_ ]', '', x))
+}
 
 # ============================================================
 # 4. PER-FILE PROCESSING
@@ -318,7 +342,8 @@ process_monitor_file <- function(filename,
                                  dd_days = NULL,
                                  rasterplots_only = FALSE,
                                  zt_0 = ymd_hm('01-1-1 8:00'),
-                                 output_root = './output') {
+                                 output_root = './output',
+                                 sample_periods = NULL) {
   
   flags <- character()  # collects anything worth flagging for this file
   
@@ -391,10 +416,30 @@ process_monitor_file <- function(filename,
     flags <- c(flags, "'datetime' column missing")
   }
   
+  # Auto-detect this file's actual lights-on time rather than assuming a
+  # fixed schedule - monitor groups run on different regimes (8am-8pm,
+  # 8pm-8am, 1am-1pm), so a single global zt_0 mislabels ZT0/clock time
+  # for whichever groups don't match it. Must resolve before
+  # detect_dd_start_day() below, since that function also depends on zt_0.
+  if (identical(zt_0, "auto")) {
+    lights_on_result <- derive_lights_on_from_data(data)
+    if (!is.na(lights_on_result$inferred_lights_on)) {
+      zt_0 <- ymd_hm(paste0('01-1-1 ', lights_on_result$inferred_lights_on))
+      flags <- c(flags, str_interp("zt_0 auto-detected as ${lights_on_result$inferred_lights_on} lights-on"))
+      if (lights_on_result$weak_agreement) {
+        flags <- c(flags, str_interp("auto-detected zt_0 has weak agreement (${lights_on_result$note}) - worth verifying manually"))
+      }
+    } else {
+      zt_0 <- ymd_hm('01-1-1 8:00')
+      flags <- c(flags, "zt_0 = 'auto' requested but no light-on transitions found - defaulting to 08:00")
+    }
+  }
+  
   # Resolve "auto" into a real day number, using the same zt_0 that
   # combined_plot() below will use. used_auto controls the LD/DD split
   # branch further down (single-split vs multi-phase segmentation).
   used_auto <- identical(section2_start_day, "auto")
+  
   if (used_auto) {
     detected <- detect_dd_start_day(data, zt_0)
     flags <- c(flags, detected$note)
@@ -542,6 +587,24 @@ process_monitor_file <- function(filename,
       next
     }
     
+    sample_point <- NULL
+    if (!is.null(sample_periods)) {
+      srow <- sample_periods %>% filter(normalize_spider_id(spider_id) == normalize_spider_id(name))
+      if (nrow(srow) > 1) {
+        flags <- c(flags, str_interp("multiple sample_periods rows matched spider_id '${name}' - using first"))
+        srow <- srow[1, ]
+      }
+      if (nrow(srow) == 1) {
+        sample_zt <- coalesce(srow$ZT, srow$CT)
+        sample_label_type <- if (!is.na(srow$ZT)) "ZT" else if (!is.na(srow$CT)) "CT" else NA
+        if (!is.na(sample_zt)) {
+          sample_point <- list(zt = sample_zt, label_type = sample_label_type)
+        } else {
+          flags <- c(flags, str_interp("spider_id '${name}' found in sample_periods but both ZT and CT are NA - no sample line drawn"))
+        }
+      }
+    }
+    
     activity <- check_activity(data, spiderid)
     message(str_interp("  Channel ${sp_channel}: ${activity}"))
     
@@ -556,7 +619,7 @@ process_monitor_file <- function(filename,
     
     if (rasterplots_only) {
       plot <- tryCatch(
-        rasterplot(data, spiderid, plot_title = str_interp('Activity for ${name}'), zt_0 = zt_0),
+        rasterplot(data, spiderid, plot_title = str_interp('Activity for ${name}'), zt_0 = zt_0, sample_point = sample_point),
         error = function(e) {
           flags <<- c(flags, str_interp("rasterplot failed for ${spiderid}: ${conditionMessage(e)}"))
           NULL
@@ -574,7 +637,7 @@ process_monitor_file <- function(filename,
       
     } else if (use_rasterplot_fallback) {
       raster_plot <- tryCatch(
-        rasterplot(data, spiderid, plot_title = str_interp('Activity for ${name}'), zt_0 = zt_0),
+        rasterplot(data, spiderid, plot_title = str_interp('Activity for ${name}'), zt_0 = zt_0, sample_point = sample_point),
         error = function(e) {
           flags <<- c(flags, str_interp("rasterplot failed for ${spiderid}: ${conditionMessage(e)}"))
           NULL
@@ -596,6 +659,20 @@ process_monitor_file <- function(filename,
       perio_plots <- list()
       if (!is.null(seg_result) && nrow(seg_result$summary) > 0) {
         eligible_phases <- seg_result$summary %>% filter(periodogram_eligible)
+        
+        # Cap combined image to 2 periodogram panels max - files with 3+
+        # eligible phases still get a raster spanning the full recording,
+        # but only the 2 phases with the most actual data get periodograms
+        # computed/plotted (a periodogram's power to detect a period scales
+        # with how much data feeds it, so the longest phases are the most
+        # informative to keep).
+        if (nrow(eligible_phases) > 2) {
+          eligible_phases <- eligible_phases %>% arrange(desc(duration_hours))
+          dropped_labels <- eligible_phases$seg_label[3:nrow(eligible_phases)]
+          flags <- c(flags, str_interp("periodogram panels capped at 2 (kept longest by duration) - skipping ${str_c(dropped_labels, collapse = ', ')} (raster still shows full data)"))
+          eligible_phases <- eligible_phases %>% slice(1:2) %>% arrange(segment_id)
+        }
+        
         for (i in seq_len(nrow(eligible_phases))) {
           seg_row <- eligible_phases[i, ]
           perio <- tryCatch(
@@ -856,7 +933,8 @@ run_batch_analysis <- function(base_dir,
                                rasterplots_only = FALSE,
                                zt_0 = ymd_hm('01-1-1 8:00'),
                                output_root = './output',
-                               dedupe_checkpoints = TRUE) {
+                               dedupe_checkpoints = TRUE,
+                               sample_periods = NULL) {
   
   flag_log <- data.frame(group = character(), file = character(), flag = character())
   
@@ -907,7 +985,7 @@ run_batch_analysis <- function(base_dir,
       message(str_interp("\n=== Processing ${group_name} / ${basename(f)} ==="))
       
       result <- tryCatch(
-        process_monitor_file(f, group_name, section2_start_day, dd_days, rasterplots_only, zt_0, output_root),
+        process_monitor_file(f, group_name, section2_start_day, dd_days, rasterplots_only, zt_0, output_root, sample_periods),
         error = function(e) {
           message(str_interp("!! FATAL ERROR on ${f}: ${conditionMessage(e)}"))
           list(subfolder_name = basename(f),
@@ -1140,7 +1218,7 @@ check_lights_on <- function(base_dir, group_folders, output_root = './output', t
       
       result <- derive_lights_on_from_data(data, tolerance_min)
       
-      summary_log <- summaryView_log %>%
+      summary_log <- summary_log %>%
         add_row(group = group_name, file = basename(f),
                 inferred_lights_on = result$inferred_lights_on,
                 n_days_supporting = result$n_days_supporting,

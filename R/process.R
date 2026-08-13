@@ -30,7 +30,7 @@ lineplot <- function(data, spiderid) {
     geom_ribbon(aes(ymin=0, ymax=(get(spiderid)>0)*1), stat="identity", fill="#101010")
 }
 
-rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt = NULL, end_dt = NULL) {
+rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt = NULL, end_dt = NULL, sample_point = NULL) {
   if (is.null(start_dt)) {
     start_dt <- data$datetime
   }
@@ -40,15 +40,13 @@ rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt 
   }
   
   if (is.null(zt_0)) {
-    # get first time light turns on
     light_changes <- data %>%
       filter(light - lag(light) == 1) %>%
       pull(datetime)
     
     if (light_changes %>% length() != 0) {
       zt_0 <- light_changes %>% first()
-    }
-    else {
+    } else {
       zt_0 <- 0
     }
   }
@@ -70,6 +68,32 @@ rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt 
   
   y_breaks <- unique(data$zt_day)
   x_breaks <- seq(0, 24, 3)
+  
+  # Clock-time labels stacked under ZT ticks. Guards against zt_0 having
+  # fallen back to a bare numeric 0 above (no light column) rather than
+  # a real POSIXct - in that case just show ZT numbers.
+  x_labels <- as.character(x_breaks)
+  if (inherits(zt_0, "POSIXct")) {
+    zt0_hour <- as.numeric(format(zt_0, "%H")) + as.numeric(format(zt_0, "%M")) / 60
+    clock_at_zt <- function(zt) {
+      ch <- (zt0_hour + zt) %% 24
+      sprintf("%02d:%02d", floor(ch), round((ch %% 1) * 60))
+    }
+    x_labels <- paste0("ZT", x_breaks, "\n", sapply(x_breaks, clock_at_zt))
+  }
+  
+  sample_line_df <- NULL
+  if (!is.null(sample_point) && !is.na(sample_point$zt)) {
+    sample_line_df <- tibble(
+      zt_day = max(data$zt_day, na.rm = TRUE),
+      zt_time = sample_point$zt,
+      label = str_interp("${sample_point$label_type}${sample_point$zt}"),
+      # Flip label direction near the right edge of the 0-24 axis so it
+      # grows left instead of clipping off the plot.
+      label_hjust = if_else(sample_point$zt >= 20, 1, 0),
+      label_x = if_else(sample_point$zt >= 20, sample_point$zt - 0.5, sample_point$zt + 0.5)
+    )
+  }
   
   missing <- detectmissing(data)
   
@@ -94,17 +118,30 @@ rasterplot <- function(data, spiderid, plot_title = NULL, zt_0 = NULL, start_dt 
   ggplot(data, aes(x=zt_time+1/120, width=1/60, y=zt_day, height=.8)) +
     geom_tile(mapping=aes(fill=color)) +
     scale_y_reverse(breaks=y_breaks) +
-    scale_x_continuous(breaks=x_breaks) +
+    scale_x_continuous(breaks=x_breaks, labels=x_labels) +
     scale_fill_manual(values=c(none= "#00000000", light="#ffff66", active="#000000", missing='#ff0000')) +
     geom_rect(data=missing_df, mapping=aes(xmin=start_time, xmax=zt_time, ymin=zt_day-.4, ymax=zt_day+.4, fill="missing")) +
     geom_rect(mapping=aes(xmin=0, xmax=24, ymin=zt_day - .4, ymax=zt_day + .4, fill="none"), color="#000000") +
+    { if (!is.null(sample_line_df))
+      geom_segment(data = sample_line_df,
+                   aes(x = zt_time, xend = zt_time,
+                       y = max(data$zt_day) - .4,
+                       yend = max(data$zt_day) + .4),
+                   color = "red", linewidth = 1, linetype = "solid", inherit.aes = FALSE)
+    } +
+    { if (!is.null(sample_line_df))
+      geom_text(data = sample_line_df,
+                aes(x = label_x, y = zt_day, label = label, hjust = label_hjust),
+                color = "red", size = 3, fontface = "bold", inherit.aes = FALSE)
+    } +
     theme(panel.background = element_rect(fill="#ffffff"),
           panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank()) +
+          panel.grid.minor = element_blank(),
+          axis.line.x = element_line(color = "black"),
+          axis.ticks.x = element_line(color = "black")) +
     ggtitle(plot_title) +
     labs(
-      x="ZT (hrs)",
+      x="ZT (hrs) / Time of Day",
       y="Day",
       color="Legend"
-    )
-}
+    ) }
