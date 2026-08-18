@@ -7,7 +7,7 @@
 # run across every group folder.
 # ============================================================
 
-source('batch-monitor-function.R')
+source('R/batch-monitor-function.R')
 
 # base_dir points at the Box Drive location for the RNA-seq experiment data.
 base_dir <- "/Users/isabelduarte/Library/CloudStorage/Box-Box/Summer2025-2026_Circadian_Students/Spider behavioral data and analysis/Locomotor activity monitor data/MW behavior for RNA-seq experiment/data"
@@ -69,7 +69,8 @@ flags <- run_batch_analysis(
   rasterplots_only    = FALSE,
   dedupe_checkpoints  = TRUE,
   output_root         = output_root,
-  sample_periods      = sample_periods,
-  zt_0                = "auto"
+  sample_periods      = MW_LD_DD_periods,
+  zt_0                = "auto",
+  zt0_lookup          = zt0_lookup
 )
 View(flags)
